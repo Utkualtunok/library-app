@@ -1,46 +1,30 @@
-// src/pages/Homepage.jsx
-import React from 'react';
-import { Container, Typography, Button, Stack } from '@mui/material';
-import { Link } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { Container } from '@mui/material';
+import { fetchAuthors } from '../services/api';
 
 function Homepage() {
+    const [authors, setAuthors] = useState([]); 
+
+    useEffect(() => {
+        fetchAuthors()
+            .then((response) => {
+                setAuthors(response.data); 
+            })
+            .catch((error) => {
+                console.error("Error fetching authors:", error);
+            });
+    }, []);
+
     return (
         <Container>
-            <Typography variant="h2" gutterBottom>
-                Kütüphane Ana Sayfası
-            </Typography>
-
-            <Stack spacing={2} sx={{ mt: 4 }}>
-                <Button
-                    component={Link}
-                    to="/books"
-                    variant="contained"
-                    color="primary"
-                    size="large"
-                >
-                    Kitaplar
-                </Button>
-
-                <Button
-                    component={Link}
-                    to="/authors"
-                    variant="contained"
-                    color="secondary"
-                    size="large"
-                >
-                    Yazarlar
-                </Button>
-
-                <Button
-                    component={Link}
-                    to="/categories"
-                    variant="contained"
-                    color="success"
-                    size="large"
-                >
-                    Kategoriler
-                </Button>
-            </Stack>
+            <h1>Test</h1>
+            {authors.map((item, index) => (
+                <ul key={index}>
+                    <li>
+                        {item.name} - {item.birthDate} - {item.country}
+                    </li>
+                </ul>
+            ))}
         </Container>
     );
 }
