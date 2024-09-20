@@ -5,8 +5,7 @@ import HomePage from './pages/HomePage';
 import PublisherPage from './pages/PublisherPage';
 import CategoryPage from './pages/CategoryPage';
 import BookPage from './pages/BookPage';
-import AuthorPage from './pages/AuthorPage';
-import BookLoanPage from './pages/BookLoanPage';
+import AuthorPage from './pages/Author/AuthorPage';
 
 const AppRoutes = () => {
     return (
@@ -17,7 +16,6 @@ const AppRoutes = () => {
                 <Route path="/categories" element={<CategoryPage />} />
                 <Route path="/books" element={<BookPage />} />
                 <Route path="/authors" element={<AuthorPage />} />
-                <Route path="/book-loans" element={<BookLoanPage />} />
             </Routes>
         </Router>
     );
