@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import PublisherPage from './pages/PublisherPage';
 import CategoryPage from './pages/CategoryPage';
-import BookPage from './pages/BookPage';
+import BookPage from './pages/Book/BookPage';
 import AuthorPage from './pages/Author/AuthorPage';
 
 const AppRoutes = () => {

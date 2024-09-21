@@ -6,7 +6,7 @@
     align-items: center;
     justify-content: center;
     padding: 20px;
-    background-color: #FFFDD0;
+    background-color: #3b3b2d6b;
     color: #333;
     height: 100vh;
 }
@@ -26,8 +26,7 @@ h1 {
 .greeting {
     text-align: center;
     margin-bottom: 20px;
-    background-color: rgba(255, 255, 255, 1);
-    /* Daha opak beyaz arka plan */
+    background-color: rgb(243, 243, 243);
     padding: 20px;
     border-radius: 8px;
 }
@@ -35,7 +34,6 @@ h1 {
 .greeting span {
     font-size: 1.5rem;
     color: #333;
-    /* Koyu gri açıklama rengi */
 }
 
 .greeting ul {
@@ -46,13 +44,11 @@ h1 {
 .greeting li {
     font-size: 1.1rem;
     color: #555;
-    /* Açık gri liste rengi */
     margin: 5px 0;
 }
 
 h2 {
     font-size: 1.5rem;
     color: #333;
-    /* Koyu gri ikinci başlık rengi */
     text-align: center;
 }
