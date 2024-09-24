@@ -9,6 +9,10 @@
     background-color: #3b3b2d6b;
     color: #333;
     height: 100vh;
+    max-width: 1200px;
+    /* Genişlik sınırı eklendi */
+    margin: 0 auto;
+    /* Ortalamak için */
 }
 
 h1 {
@@ -29,6 +33,10 @@ h1 {
     background-color: rgb(243, 243, 243);
     padding: 20px;
     border-radius: 8px;
+    max-width: 100%;
+    /* Genişlik sınırı 1200px'e uygun olacak */
+    box-sizing: border-box;
+    /* İçerik taşmasını engeller */
 }
 
 .greeting span {

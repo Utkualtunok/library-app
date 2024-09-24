@@ -1,191 +1,232 @@
-import React, { useState, useEffect } from "react";
-import { Button, MenuItem, Select, TextField, InputLabel, FormControl } from "@mui/material";
-import axios from 'axios';
+import React, { useState, useEffect } from 'react';
+import { Modal, Button, TextField, MenuItem, Select, InputLabel, FormControl, Card, CardContent, Typography, IconButton, Paper, Stack } from '@mui/material';
+import { Link } from 'react-router-dom';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import './BookPage.css';  // CSS dosyasını ekleyin
 
-const initialBook = {
-    name: "",
-    publicationYear: "",
-    stock: "",
-    author: {
-        id: "",
-        name: "",
-        birthDate: "2024-09-23",
-        country: ""
-    },
-    publisher: {
-        id: "",
-        name: "",
-        establishmentYear: 0,
-        address: ""
-    },
-    categories: [], // Kategoriler dizi olarak tanımlandı
-};
+const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
 
-const BookPage = () => {
-    const [book, setBook] = useState([]); // Başlangıçta boş dizi
-    const [newBook, setNewBook] = useState(initialBook);
+const Book = () => {
+    const [modalOpen, setModalOpen] = useState(false);
+    const [formData, setFormData] = useState({ title: '', publicationYear: '', stock: '', authorId: '', categoryId: '', publisherId: '' });
+    const [editData, setEditData] = useState(null);
+    const [books, setBooks] = useState([]);
+    const [filteredBooks, setFilteredBooks] = useState([]);
+    const [searchTerm, setSearchTerm] = useState('');
     const [authors, setAuthors] = useState([]);
-    const [publishers, setPublishers] = useState([]);
     const [categories, setCategories] = useState([]);
-    const [selectedCategories, setSelectedCategories] = useState([]); // Seçilen kategoriler için state
-    const [update, setUpdate] = useState(false);
+    const [publishers, setPublishers] = useState([]);
 
     useEffect(() => {
-        axios.get(import.meta.env.VITE_APP_BASE_URL + "/api/v1/books")
-            .then((res) => setBook(res.data.content));
+        fetch(`${apiUrl}/books`)
+            .then(response => response.json())
+            .then(data => {
+                setBooks(data);
+                setFilteredBooks(data);  // Tüm kitapları filtrelenmiş kitaplara ekle
+            })
+            .catch(error => console.error('Kitaplar yüklenirken hata oluştu:', error));
 
-        axios.get(import.meta.env.VITE_APP_BASE_URL + "/api/v1/authors")
-            .then((res) => setAuthors(res.data.content));
+        fetch(`${apiUrl}/authors`)
+            .then(response => response.json())
+            .then(data => setAuthors(data))
+            .catch(error => console.error('Yazarlar yüklenirken hata oluştu:', error));
 
-        axios.get(import.meta.env.VITE_APP_BASE_URL + "/api/v1/publishers")
-            .then((res) => setPublishers(res.data.content));
+        fetch(`${apiUrl}/categories`)
+            .then(response => response.json())
+            .then(data => setCategories(data))
+            .catch(error => console.error('Kategoriler yüklenirken hata oluştu:', error));
 
-        axios.get(import.meta.env.VITE_APP_BASE_URL + "/api/v1/categories")
-            .then((res) => setCategories(res.data.content));
+        fetch(`${apiUrl}/publishers`)
+            .then(response => response.json())
+            .then(data => setPublishers(data))
+            .catch(error => console.error('Yayıncılar yüklenirken hata oluştu:', error));
+    }, []);
 
-        setUpdate(true);
-    }, [update]);
+    const handleSearch = (e) => {
+        setSearchTerm(e.target.value);
+        const filtered = books.filter(book => book.name.toLowerCase().includes(e.target.value.toLowerCase()));
+        setFilteredBooks(filtered);
+    };
 
-    const handleNewBookInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewBook({
-            ...newBook,
-            [name]: value,
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const url = editData ? `${apiUrl}/books/${editData.id}` : `${apiUrl}/books`;
+        const method = editData ? 'PUT' : 'POST';
+
+        fetch(url, {
+            method,
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                name: formData.title,
+                publicationYear: formData.publicationYear,
+                stock: formData.stock,
+                author: { id: formData.authorId },
+                category: { id: formData.categoryId },
+                publisher: { id: formData.publisherId }
+            })
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (editData) {
+                    setBooks(books.map(b => b.id === editData.id ? data : b));
+                    setEditData(null);
+                } else {
+                    setBooks([...books, data]);
+                }
+                setFilteredBooks([...books, data]);  // Güncellenmiş veriyi filtrelenmiş kitaplara ekle
+                setModalOpen(true);
+            })
+            .catch(error => console.error('İşlem sırasında hata oluştu:', error));
+    };
+
+    const handleEdit = (book) => {
+        setFormData({
+            title: book.name,
+            publicationYear: book.publicationYear,
+            stock: book.stock,
+            authorId: book.author?.id || '',
+            categoryId: book.category?.id || '',
+            publisherId: book.publisher?.id || ''
         });
+        setEditData(book);
     };
 
-    const handleNewBookAuthorSelect = (e) => {
-        const { value } = e.target;
-        const newBookAuthor = authors.find((aut) => aut.id === value);
-        setNewBook((prev) => ({
-            ...prev,
-            author: newBookAuthor,
-        }));
-    };
-
-    const handleNewBookPublisherSelect = (e) => {
-        const { value } = e.target;
-        const newBookPublisher = publishers.find((pub) => pub.id === value);
-        setNewBook((prev) => ({
-            ...prev,
-            publisher: newBookPublisher,
-        }));
-    };
-
-    const handleNewBookCategorySelect = (e) => {
-        const { value } = e.target;
-        const selectedCategories = Array.from(e.target.selectedOptions, option => option.value);
-        setSelectedCategories(selectedCategories);
-        const newCategories = categories.filter((cat) => selectedCategories.includes(cat.id));
-        setNewBook((prev) => ({
-            ...prev,
-            categories: newCategories,
-        }));
-    };
-
-    const handleAddNewBookBtn = () => {
-        axios.post(import.meta.env.VITE_APP_BASE_URL + "/api/v1/books", newBook)
-            .then((res) => {
-                console.log(res.data);
-                setUpdate(false);
-                setNewBook(initialBook); // Formu sıfırla
-                setSelectedCategories([]); // Seçilen kategorileri sıfırla
-            });
+    const handleDelete = (id) => {
+        fetch(`${apiUrl}/books/${id}`, { method: 'DELETE' })
+            .then(() => {
+                setBooks(books.filter(b => b.id !== id));
+                setFilteredBooks(filteredBooks.filter(b => b.id !== id)); // Silinen kitabı filtrelenmiş listeden kaldır
+                setModalOpen(true);
+            })
+            .catch(error => console.error('Kitap silinirken hata oluştu:', error));
     };
 
     return (
-        <>
-            <h1>TEST</h1>
+        <Paper sx={{ p: 3, display: 'flex', flexDirection: 'column', height: '100vh', maxWidth: 1200, mx: 'auto' }}>
+            <Typography variant="h4" component="h1" mb={2}>Kitap Sayfası</Typography>
+            <Button component={Link} to="/" variant="contained" color="primary" sx={{ mb: 2 }}>Ana Sayfa</Button>
+
+            <form onSubmit={handleSubmit} className="book-form">
+                <Stack spacing={2}>
+                    <TextField
+                        label="Kitap Başlığı"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        fullWidth
+                        required
+                    />
+                    <TextField
+                        label="Yayın Yılı"
+                        type="number"
+                        value={formData.publicationYear}
+                        onChange={(e) => setFormData({ ...formData, publicationYear: e.target.value })}
+                        fullWidth
+                        required
+                    />
+                    <TextField
+                        label="Stok"
+                        type="number"
+                        value={formData.stock}
+                        onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                        fullWidth
+                        required
+                    />
+                    <FormControl fullWidth required>
+                        <InputLabel id="author-select-label">Yazar Seç</InputLabel>
+                        <Select
+                            labelId="author-select-label"
+                            value={formData.authorId}
+                            onChange={(e) => setFormData({ ...formData, authorId: e.target.value })}
+                            label="Yazar Seç"
+                        >
+                            <MenuItem value=""><em>Seçiniz</em></MenuItem>
+                            {authors.map(author => (
+                                <MenuItem key={author.id} value={author.id}>{author.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth required>
+                        <InputLabel id="category-select-label">Kategori Seç</InputLabel>
+                        <Select
+                            labelId="category-select-label"
+                            value={formData.categoryId}
+                            onChange={(e) => setFormData({ ...formData, categoryId: e.target.value })}
+                            label="Kategori Seç"
+                        >
+                            <MenuItem value=""><em>Seçiniz</em></MenuItem>
+                            {categories.map(category => (
+                                <MenuItem key={category.id} value={category.id}>{category.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <FormControl fullWidth required>
+                        <InputLabel id="publisher-select-label">Yayıncı Seç</InputLabel>
+                        <Select
+                            labelId="publisher-select-label"
+                            value={formData.publisherId}
+                            onChange={(e) => setFormData({ ...formData, publisherId: e.target.value })}
+                            label="Yayıncı Seç"
+                        >
+                            <MenuItem value=""><em>Seçiniz</em></MenuItem>
+                            {publishers.map(publisher => (
+                                <MenuItem key={publisher.id} value={publisher.id}>{publisher.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+                    <Button type="submit" variant="contained" color="primary">
+                        {editData ? 'Güncelle' : 'Ekle'}
+                    </Button>
+                </Stack>
+            </form>
+
             <TextField
-                label="Name"
-                variant="standard"
-                name="name"
-                value={newBook.name}
-                onChange={handleNewBookInputChange}
+                label="Kitap Arama"
+                value={searchTerm}
+                onChange={handleSearch}
+                fullWidth
+                sx={{ mb: 2 }}
             />
-            <br />
-            <TextField
-                label="Publication Year"
-                variant="standard"
-                name="publicationYear"
-                value={newBook.publicationYear}
-                onChange={handleNewBookInputChange}
-            />
-            <br />
-            <TextField
-                label="Stock"
-                variant="standard"
-                name="stock"
-                value={newBook.stock}
-                onChange={handleNewBookInputChange}
-            />
-            <br />
-            <FormControl variant="standard">
-                <InputLabel>Select Authors</InputLabel>
-                <Select
-                    variant="standard"
-                    onChange={handleNewBookAuthorSelect}
-                >
-                    <MenuItem value={0} disabled>
-                        Select Authors
-                    </MenuItem>
-                    {authors.map((aut, index) => (
-                        <MenuItem key={`${index}authors`} value={aut.id}>
-                            {aut.name}
-                        </MenuItem>
+
+            <Typography variant="h6" component="h3" className="book-list-title">Kitap Listesi:</Typography>
+            <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                <Stack spacing={2}>
+                    {filteredBooks.slice(0, 5).map(book => (
+                        <Card key={book.id} className="book-card">
+                            <CardContent>
+                                <Typography variant="body1">{book.name} - {book.author ? book.author.name : 'Yazar yok'}</Typography>
+                            </CardContent>
+                            <div className="book-card-actions">
+                                <IconButton onClick={() => handleEdit(book)} color="primary">
+                                    <EditIcon />
+                                </IconButton>
+                                <IconButton onClick={() => handleDelete(book.id)} color="secondary">
+                                    <DeleteIcon />
+                                </IconButton>
+                            </div>
+                        </Card>
                     ))}
-                </Select>
-            </FormControl>
-            <br />
-            <FormControl variant="standard">
-                <InputLabel>Select Publishers</InputLabel>
-                <Select
-                    variant="standard"
-                    onChange={handleNewBookPublisherSelect}
-                >
-                    <MenuItem value={0} disabled>
-                        Select Publishers
-                    </MenuItem>
-                    {publishers.map((pub, index) => (
-                        <MenuItem key={`${index}publishers`} value={pub.id}>
-                            {pub.name}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-            <br />
-            <FormControl variant="standard">
-                <InputLabel>Select Categories</InputLabel>
-                <Select
-                    multiple
-                    variant="standard"
-                    value={selectedCategories} // value prop'u eklendi
-                    onChange={handleNewBookCategorySelect}
-                >
-                    {categories.map((cat, index) => (
-                        <MenuItem key={`${index}categories`} value={cat.id}>
-                            {cat.name}
-                        </MenuItem>
-                    ))}
-                </Select>
-            </FormControl>
-            <br />
-            <Button variant="contained" color="error" onClick={handleAddNewBookBtn}>
-                Add New Book
-            </Button>
-            {Array.isArray(book) && book.length > 0 ? ( // Hata kontrolü eklendi
-                book.map((item, index) => (
-                    <ul key={index}>
-                        <li>
-                            {item.name} {item.author.name} {item.publisher.name}
-                        </li>
-                    </ul>
-                ))
-            ) : (
-                <p>No books available.</p> // Boşsa bilgi ver
-            )}
-        </>
+                </Stack>
+            </div>
+
+            <Modal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                aria-labelledby="modal-title"
+                aria-describedby="modal-description"
+            >
+                <div className="book-modal">
+                    <Typography id="modal-title" variant="h6" component="h2">
+                        İşlem Başarılı
+                    </Typography>
+                    <Typography id="modal-description" sx={{ mt: 2 }}>
+                        İşlem başarıyla gerçekleştirildi.
+                    </Typography>
+                    <Button onClick={() => setModalOpen(false)}>Kapat</Button>
+                </div>
+            </Modal>
+        </Paper>
     );
 };
 
-export default BookPage;
+export default Book;

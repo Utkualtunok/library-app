@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    TextField, Button, Box, Typography, Alert, Paper, Stack, IconButton
+    TextField, Button, Typography, Paper, Stack, IconButton, Modal
 } from '@mui/material';
 import { createCategory, getCategories, updateCategory, deleteCategory } from '../api/categoryAPI';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,7 +10,9 @@ const CategoryCRUD = () => {
     const [categories, setCategories] = useState([]);
     const [newCategory, setNewCategory] = useState({ id: '', name: '', description: '' });
     const [isEdit, setIsEdit] = useState(false);
-    const [alert, setAlert] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalTitle, setModalTitle] = useState('');
 
     useEffect(() => {
         fetchCategories();
@@ -29,26 +31,35 @@ const CategoryCRUD = () => {
         try {
             if (isEdit) {
                 await updateCategory(newCategory);
-                setAlert('success');
+                setModalTitle('Güncelleme Başarı');
+                setModalMessage('Kategori başarıyla güncellendi!');
             } else {
                 await createCategory(newCategory);
-                setAlert('success');
+                setModalTitle('Ekleme Başarı');
+                setModalMessage('Kategori başarıyla eklendi!');
             }
+            setModalOpen(true);
             fetchCategories();
             setNewCategory({ id: '', name: '', description: '' });
             setIsEdit(false);
         } catch {
-            setAlert('error');
+            setModalTitle('Hata');
+            setModalMessage('Bir hata oluştu!');
+            setModalOpen(true);
         }
     };
 
     const handleDelete = async (id) => {
         try {
             await deleteCategory(id);
-            setAlert('success');
+            setModalTitle('Silme Başarı');
+            setModalMessage('Kategori başarıyla silindi!');
+            setModalOpen(true);
             fetchCategories();
         } catch {
-            setAlert('error');
+            setModalTitle('Hata');
+            setModalMessage('Bir hata oluştu!');
+            setModalOpen(true);
         }
     };
 
@@ -82,12 +93,6 @@ const CategoryCRUD = () => {
                 </Button>
             </Stack>
 
-            {alert && (
-                <Alert severity={alert === 'success' ? 'success' : 'error'}>
-                    {alert === 'success' ? 'İşlem başarılı!' : 'Bir hata oluştu!'}
-                </Alert>
-            )}
-
             <Typography variant="h5" mt={4}>Kategoriler</Typography>
             {categories.length === 0 ? (
                 <Typography>Henüz bir kategori yok.</Typography>
@@ -100,10 +105,10 @@ const CategoryCRUD = () => {
                                 <Typography variant="body2">Açıklama: {category.description}</Typography>
                             </div>
                             <div>
-                                <IconButton onClick={() => handleEdit(category)}>
+                                <IconButton onClick={() => handleEdit(category)} color='primary'>
                                     <EditIcon />
                                 </IconButton>
-                                <IconButton onClick={() => handleDelete(category.id)}>
+                                <IconButton onClick={() => handleDelete(category.id)} color='secondary'>
                                     <DeleteIcon />
                                 </IconButton>
                             </div>
@@ -111,6 +116,26 @@ const CategoryCRUD = () => {
                     ))}
                 </Stack>
             )}
+
+            {/* Modal Bileşeni */}
+            <Modal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                aria-labelledby="modal-title"
+                aria-describedby="modal-description"
+            >
+                <div className="book-modal">
+                    <Typography id="modal-title" variant="h6">
+                        {modalTitle}
+                    </Typography>
+                    <Typography id="modal-description">
+                        {modalMessage}
+                    </Typography>
+                    <Button onClick={() => setModalOpen(false)} variant="contained" color="primary">
+                        Tamam
+                    </Button>
+                </div>
+            </Modal>
         </Paper>
     );
 };

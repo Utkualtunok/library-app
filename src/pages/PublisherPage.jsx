@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    TextField, Button, Box, Typography, Alert, Paper, Stack, IconButton
+    TextField, Button, Typography, Paper, Stack, IconButton, Modal
 } from '@mui/material';
 import { createPublisher, getPublishers, updatePublisher, deletePublisher } from '../api/publisherAPI';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,7 +10,9 @@ const PublisherCRUD = () => {
     const [publishers, setPublishers] = useState([]);
     const [newPublisher, setNewPublisher] = useState({ id: '', name: '', establishmentYear: '', address: '' });
     const [isEdit, setIsEdit] = useState(false);
-    const [alert, setAlert] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalTitle, setModalTitle] = useState('');
 
     // Yayıncıları almak için GET işlemi
     useEffect(() => {
@@ -30,26 +32,35 @@ const PublisherCRUD = () => {
         try {
             if (isEdit) {
                 await updatePublisher(newPublisher);
-                setAlert('success');
+                setModalTitle('Güncelleme Başarı');
+                setModalMessage('Yayıncı başarıyla güncellendi!');
             } else {
                 await createPublisher(newPublisher);
-                setAlert('success');
+                setModalTitle('Ekleme Başarı');
+                setModalMessage('Yayıncı başarıyla eklendi!');
             }
+            setModalOpen(true);
             fetchPublishers();
             setNewPublisher({ id: '', name: '', establishmentYear: '', address: '' });
             setIsEdit(false);
         } catch {
-            setAlert('error');
+            setModalTitle('Hata');
+            setModalMessage('Bir hata oluştu!');
+            setModalOpen(true);
         }
     };
 
     const handleDelete = async (id) => {
         try {
             await deletePublisher(id);
-            setAlert('success');
+            setModalTitle('Silme Başarı');
+            setModalMessage('Yayıncı başarıyla silindi!');
+            setModalOpen(true);
             fetchPublishers();
         } catch {
-            setAlert('error');
+            setModalTitle('Hata');
+            setModalMessage('Bir hata oluştu!');
+            setModalOpen(true);
         }
     };
 
@@ -90,12 +101,6 @@ const PublisherCRUD = () => {
                 </Button>
             </Stack>
 
-            {alert && (
-                <Alert severity={alert === 'success' ? 'success' : 'error'}>
-                    {alert === 'success' ? 'İşlem başarılı!' : 'Bir hata oluştu!'}
-                </Alert>
-            )}
-
             <Typography variant="h5" mt={4}>Yayıncılar</Typography>
             {publishers.length === 0 ? (
                 <Typography>Henüz bir yayıncı yok.</Typography>
@@ -108,10 +113,10 @@ const PublisherCRUD = () => {
                                 <Typography variant="body2">Kuruluş Yılı: {publisher.establishmentYear}, Adres: {publisher.address}</Typography>
                             </div>
                             <div>
-                                <IconButton onClick={() => handleEdit(publisher)}>
+                                <IconButton onClick={() => handleEdit(publisher)} color='primary'>
                                     <EditIcon />
                                 </IconButton>
-                                <IconButton onClick={() => handleDelete(publisher.id)}>
+                                <IconButton onClick={() => handleDelete(publisher.id)} color='secondary'>
                                     <DeleteIcon />
                                 </IconButton>
                             </div>
@@ -119,6 +124,26 @@ const PublisherCRUD = () => {
                     ))}
                 </Stack>
             )}
+
+            {/* Modal Bileşeni */}
+            <Modal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                aria-labelledby="modal-title"
+                aria-describedby="modal-description"
+            >
+                <div className="book-modal">
+                    <Typography id="modal-title" variant="h6">
+                        {modalTitle}
+                    </Typography>
+                    <Typography id="modal-description">
+                        {modalMessage}
+                    </Typography>
+                    <Button onClick={() => setModalOpen(false)} variant="contained" color="primary">
+                        Tamam
+                    </Button>
+                </div>
+            </Modal>
         </Paper>
     );
 };

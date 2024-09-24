@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    TextField, Button, Box, Typography, Alert, Paper, Stack, IconButton, Divider
+    TextField, Button, Box, Typography, Paper, Stack, IconButton, Divider, Modal
 } from '@mui/material';
 import { createAuthor, getAuthors, updateAuthor, deleteAuthor } from '../../api/authorsAPI';
 import DeleteIcon from '@mui/icons-material/Delete';
@@ -10,7 +10,9 @@ const AuthorCRUD = () => {
     const [authors, setAuthors] = useState([]);
     const [newAuthor, setNewAuthor] = useState({ id: '', name: '', birthDate: '', country: '' });
     const [isEdit, setIsEdit] = useState(false);
-    const [alert, setAlert] = useState('');
+    const [modalOpen, setModalOpen] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalTitle, setModalTitle] = useState('');
 
     // Yazarları almak için GET işlemi
     useEffect(() => {
@@ -30,25 +32,35 @@ const AuthorCRUD = () => {
         try {
             if (isEdit) {
                 await updateAuthor(newAuthor);
+                setModalTitle('Güncelleme Başarı');
+                setModalMessage('Yazar başarıyla güncellendi!');
             } else {
                 await createAuthor(newAuthor);
+                setModalTitle('Ekleme Başarı');
+                setModalMessage('Yazar başarıyla eklendi!');
             }
-            setAlert('success');
+            setModalOpen(true);
             fetchAuthors();
             setNewAuthor({ id: '', name: '', birthDate: '', country: '' });
             setIsEdit(false);
         } catch {
-            setAlert('error');
+            setModalTitle('Hata');
+            setModalMessage('Bir hata oluştu!');
+            setModalOpen(true);
         }
     };
 
     const handleDelete = async (id) => {
         try {
             await deleteAuthor(id);
-            setAlert('success');
+            setModalTitle('Silme Başarı');
+            setModalMessage('Yazar başarıyla silindi!');
+            setModalOpen(true);
             fetchAuthors();
         } catch {
-            setAlert('error');
+            setModalTitle('Hata');
+            setModalMessage('Bir hata oluştu!');
+            setModalOpen(true);
         }
     };
 
@@ -89,12 +101,6 @@ const AuthorCRUD = () => {
                 </Button>
             </Stack>
 
-            {alert && (
-                <Alert severity={alert === 'success' ? 'success' : 'error'}>
-                    {alert === 'success' ? 'İşlem başarılı!' : 'Bir hata oluştu!'}
-                </Alert>
-            )}
-
             <Divider sx={{ mt: 4, mb: 2 }} />
             <Typography variant="h5">Yazarlar</Typography>
             {authors.length === 0 ? (
@@ -108,10 +114,10 @@ const AuthorCRUD = () => {
                                 <Typography variant="body2">Doğum Tarihi: {author.birthDate}, Ülke: {author.country}</Typography>
                             </div>
                             <div>
-                                <IconButton onClick={() => handleEdit(author)}>
+                                <IconButton onClick={() => handleEdit(author)} color='primary'>
                                     <EditIcon />
                                 </IconButton>
-                                <IconButton onClick={() => handleDelete(author.id)}>
+                                <IconButton onClick={() => handleDelete(author.id)} color='secondary'>
                                     <DeleteIcon />
                                 </IconButton>
                             </div>
@@ -119,6 +125,26 @@ const AuthorCRUD = () => {
                     ))}
                 </Stack>
             )}
+
+            {/* Modal Bileşeni */}
+            <Modal
+                open={modalOpen}
+                onClose={() => setModalOpen(false)}
+                aria-labelledby="modal-title"
+                aria-describedby="modal-description"
+            >
+                <div className="book-modal">
+                    <Typography id="modal-title" variant="h6">
+                        {modalTitle}
+                    </Typography>
+                    <Typography id="modal-description">
+                        {modalMessage}
+                    </Typography>
+                    <Button onClick={() => setModalOpen(false)} variant="contained" color="primary">
+                        Tamam
+                    </Button>
+                </div>
+            </Modal>
         </Paper>
     );
 };

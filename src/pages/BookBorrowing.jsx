@@ -5,13 +5,12 @@ import {
     Button,
     Typography,
     Paper,
-    Snackbar,
-    Alert,
-    MenuItem,
-    Select,
-    InputLabel,
-    FormControl,
+    Modal,
     Stack,
+    FormControl,
+    InputLabel,
+    Select,
+    MenuItem,
     Table,
     TableBody,
     TableCell,
@@ -32,18 +31,19 @@ import {
 
 const BookBorrowing = () => {
     const [borrowings, setBorrowings] = useState([]);
-    const [books, setBooks] = useState([]); // Kitapları tutmak için state
+    const [books, setBooks] = useState([]);
     const [borrowerName, setBorrowerName] = useState('');
     const [borrowerMail, setBorrowerMail] = useState('');
     const [borrowingDate, setBorrowingDate] = useState('');
-    const [selectedBookId, setSelectedBookId] = useState(''); // Seçilen kitap ID'si
+    const [selectedBookId, setSelectedBookId] = useState('');
     const [selectedBorrowingId, setSelectedBorrowingId] = useState(null);
-    const [successMessage, setSuccessMessage] = useState('');
-    const [errorMessage, setErrorMessage] = useState('');
+    const [openModal, setOpenModal] = useState(false);
+    const [modalMessage, setModalMessage] = useState('');
+    const [modalSeverity, setModalSeverity] = useState('success'); // 'success' veya 'error'
 
     useEffect(() => {
         loadBorrowings();
-        loadBooks(); // Kitapları yükle
+        loadBooks();
     }, []);
 
     const loadBorrowings = async () => {
@@ -52,7 +52,7 @@ const BookBorrowing = () => {
     };
 
     const loadBooks = async () => {
-        const data = await getBooks(); // Kitapları API'den al
+        const data = await getBooks();
         setBooks(data);
     };
 
@@ -64,23 +64,27 @@ const BookBorrowing = () => {
                 borrowerMail,
                 borrowingDate,
                 bookForBorrowingRequest: {
-                    id: selectedBookId, // Seçilen kitap ID'si
+                    id: selectedBookId,
                 },
             };
 
             if (selectedBorrowingId) {
                 bookBorrowing.id = selectedBorrowingId;
                 await updateBookBorrowing(bookBorrowing);
-                setSuccessMessage('Ödünç alma işlemi başarıyla güncellendi.');
+                setModalMessage('Ödünç alma işlemi başarıyla güncellendi.');
+                setModalSeverity('success');
             } else {
                 await createBookBorrowing(bookBorrowing);
-                setSuccessMessage('Ödünç alma işlemi başarıyla eklendi.');
+                setModalMessage('Ödünç alma işlemi başarıyla eklendi.');
+                setModalSeverity('success');
             }
             resetForm();
             loadBorrowings();
         } catch (error) {
-            setErrorMessage('Bir hata oluştu, lütfen tekrar deneyin.');
+            setModalMessage('Bir hata oluştu, lütfen tekrar deneyin.');
+            setModalSeverity('error');
         }
+        setOpenModal(true);
     };
 
     const handleEditBorrowing = async (id) => {
@@ -88,13 +92,15 @@ const BookBorrowing = () => {
         setBorrowerName(borrowing.borrowerName);
         setBorrowerMail(borrowing.borrowerMail);
         setBorrowingDate(borrowing.borrowingDate);
-        setSelectedBookId(borrowing.bookForBorrowingRequest.id); // Kitap ID'sini setle
+        setSelectedBookId(borrowing.bookForBorrowingRequest.id);
         setSelectedBorrowingId(borrowing.id);
     };
 
     const handleDeleteBorrowing = async (id) => {
         await deleteBookBorrowing(id);
-        setSuccessMessage('Ödünç alma işlemi başarıyla silindi.');
+        setModalMessage('Ödünç alma işlemi başarıyla silindi.');
+        setModalSeverity('success');
+        setOpenModal(true);
         loadBorrowings();
     };
 
@@ -102,8 +108,12 @@ const BookBorrowing = () => {
         setBorrowerName('');
         setBorrowerMail('');
         setBorrowingDate('');
-        setSelectedBookId(''); // Seçili kitabı sıfırla
+        setSelectedBookId('');
         setSelectedBorrowingId(null);
+    };
+
+    const handleCloseModal = () => {
+        setOpenModal(false);
     };
 
     return (
@@ -217,24 +227,19 @@ const BookBorrowing = () => {
                 </TableContainer>
             </Paper>
 
-            <Snackbar
-                open={!!successMessage}
-                autoHideDuration={6000}
-                onClose={() => setSuccessMessage('')}
-            >
-                <Alert onClose={() => setSuccessMessage('')} severity="success">
-                    {successMessage}
-                </Alert>
-            </Snackbar>
-            <Snackbar
-                open={!!errorMessage}
-                autoHideDuration={6000}
-                onClose={() => setErrorMessage('')}
-            >
-                <Alert onClose={() => setErrorMessage('')} severity="error">
-                    {errorMessage}
-                </Alert>
-            </Snackbar>
+            {/* Modal for success and error messages */}
+            <Modal open={openModal} onClose={handleCloseModal}>
+                <Paper sx={{ padding: 4, margin: 'auto', marginTop: '1%', maxWidth: 400 }}>
+                    <Typography variant="h6" align="center" color={modalSeverity === 'success' ? 'black' : 'red'}>
+                        {modalMessage}
+                    </Typography>
+                    <Stack direction="row" justifyContent="center" sx={{ marginTop: 2 }}>
+                        <Button variant="contained" onClick={handleCloseModal}>
+                            Kapat
+                        </Button>
+                    </Stack>
+                </Paper>
+            </Modal>
         </Container>
     );
 };
