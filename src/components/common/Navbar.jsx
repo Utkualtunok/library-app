@@ -18,12 +18,12 @@ const pages = [
     { name: "BOOKS", path: "/books" },
     { name: "AUTHORS", path: "/authors" },
     { name: "CATEGORIES", path: "/categories" },
+    { name: "PUBLISHERS", path: "/publishers" },
+    { name: "BORROWING", path: "/borrowing" }
 ];
 
 const settings = [
-    { name: "BORROWING", path: "/borrowing" },
     { name: "RETURN", path: "/return" },
-    { name: "PUBLISHERS", path: "/publishers" },
 ];
 
 function Navbar() {

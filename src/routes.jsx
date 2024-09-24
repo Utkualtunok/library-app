@@ -1,7 +1,7 @@
 // src/routes.jsx
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
-import HomePage from './pages/HomePage';
+import HomePage from './pages/Home/HomePage'; // Ana sayfa bileşeninin yolu doğru olmalı
 import PublisherPage from './pages/PublisherPage';
 import CategoryPage from './pages/CategoryPage';
 import BookPage from './pages/Book/BookPage';

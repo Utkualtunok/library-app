@@ -1,0 +1,70 @@
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+h1,
+h3,
+h4 {
+    color: #333;
+    margin-bottom: 20px;
+    /* Başlıklar arası boşluk */
+}
+
+input,
+select,
+button {
+    margin: 15px 0;
+    /* Inputlar arasındaki boşluk */
+    padding: 10px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button {
+    cursor: pointer;
+    background-color: #007BFF;
+    color: white;
+    border: none;
+    transition: background-color 0.3s;
+    margin-top: 20px;
+    /* Buton ile inputlar arası boşluk */
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+fieldset {
+    margin-bottom: 20px;
+    /* Kategoriler bölümüne alan ekledik */
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+table,
+th,
+td {
+    border: 1px solid #ddd;
+}
+
+th,
+td {
+    padding: 10px;
+    text-align: left;
+}
+
+th {
+    background-color: #f2f2f2;
+}
+
+/* Kitap ekleme ve güncelleme bölümlerini ayıran alan */
+.book-new,
+.book-update {
+    margin-bottom: 40px;
+}
