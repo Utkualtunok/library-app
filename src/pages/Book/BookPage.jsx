@@ -51,7 +51,7 @@ const Book = () => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        const url = editData ? `${apiUrl}/books/${editData.id}` : `${apiUrl}/books`;
+        const url = editData ? `${apiUrl}/api/v1/books/${editData.id}` : `${apiUrl}/api/v1/books`;
         const method = editData ? 'PUT' : 'POST';
 
         fetch(url, {
@@ -93,7 +93,7 @@ const Book = () => {
     };
 
     const handleDelete = (id) => {
-        fetch(`${apiUrl}/books/${id}`, { method: 'DELETE' })
+        fetch(`${apiUrl}/api/v1/books/${id}`, { method: 'DELETE' })
             .then(() => {
                 setBooks(books.filter(b => b.id !== id));
                 setFilteredBooks(filteredBooks.filter(b => b.id !== id)); // Silinen kitabı filtrelenmiş listeden kaldır
