@@ -5,7 +5,7 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import './BookPage.css';  // CSS dosyasını ekleyin
 
-const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:8080/api/v1';
+const apiUrl = import.meta.env.VITE_APP_BASE_URL || 'http://localhost:8080/api/v1';
 
 const Book = () => {
     const [modalOpen, setModalOpen] = useState(false);
