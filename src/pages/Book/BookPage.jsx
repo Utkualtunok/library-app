@@ -19,7 +19,7 @@ const Book = () => {
     const [publishers, setPublishers] = useState([]);
 
     useEffect(() => {
-        fetch(`${apiUrl}/books`)
+        fetch(`${apiUrl}/api/v1/books`)
             .then(response => response.json())
             .then(data => {
                 setBooks(data);
@@ -27,17 +27,17 @@ const Book = () => {
             })
             .catch(error => console.error('Kitaplar yüklenirken hata oluştu:', error));
 
-        fetch(`${apiUrl}/authors`)
+        fetch(`${apiUrl}/api/v1/authors`)
             .then(response => response.json())
             .then(data => setAuthors(data))
             .catch(error => console.error('Yazarlar yüklenirken hata oluştu:', error));
 
-        fetch(`${apiUrl}/categories`)
+        fetch(`${apiUrl}/api/v1/categories`)
             .then(response => response.json())
             .then(data => setCategories(data))
             .catch(error => console.error('Kategoriler yüklenirken hata oluştu:', error));
 
-        fetch(`${apiUrl}/publishers`)
+        fetch(`${apiUrl}/api/v1/publishers`)
             .then(response => response.json())
             .then(data => setPublishers(data))
             .catch(error => console.error('Yayıncılar yüklenirken hata oluştu:', error));
